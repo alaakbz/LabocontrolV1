@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Échantillons & QR — PRODERMA LabControl</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand-950:#0f1f38;--brand-900:#142848;--brand-500:#427edb;--brand-100:#e7effa;--brand-50:#f2f7fd;
+  --sidebar-w:260px;--sidebar-bg:#182b45;--sidebar-border:rgba(255,255,255,0.1);
+  --sidebar-text:#d8e4f2;--sidebar-text-muted:#8ba2c2;--sidebar-item-active:#25406b;--sidebar-item-hover:rgba(255,255,255,0.08);
+  --bg-app:#f6f8fb;--bg-surface:#ffffff;--bg-subtle:#f1f4f9;
+  --border-light:#e5ebf3;--border-subtle:#d8e2ee;--border-medium:#b9c9dc;
+  --border-focus:#3b74c4;--text-main:#131b26;--text-secondary:#4a5b73;--text-muted:#74859d;
+  --ok-fg:#0d6842;--ok-bg:#ebf7f1;--ok-border:#a4ddc4;--ko-fg:#ad1818;--ko-bg:#fdf2f2;--ko-border:#f8b4b4;
+  --warn-fg:#9a5b00;--warn-bg:#fff8eb;--warn-border:#fed79e;
+  --info-fg:#1d5290;--info-bg:#eef5fc;--info-border:#b9d7f5;
+  --shadow-sm:0 1px 2px 0 rgba(19,27,38,0.04);--shadow-md:0 4px 6px -1px rgba(19,27,38,0.05);
+  --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--topbar-h:62px;
+  --transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg-app);color:var(--text-main);line-height:1.45;min-height:100vh;overflow-x:hidden}
+.font-mono,code{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+input:focus,button:focus-visible{outline:2px solid var(--border-focus);outline-offset:1px}
+.form-select{width:100%;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border-medium);border-radius:var(--radius-sm);font-size:12.5px;color:var(--text-main);transition:var(--transition)}
+.form-select:focus{border-color:var(--brand-500)}
+
+/* SIDEBAR */
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;z-index:40;border-right:1px solid var(--sidebar-border);user-select:none}
+.sidebar-header{padding:20px 18px 18px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar-brand{display:flex;align-items:center;gap:12px}
+.sidebar-logo-img{width:40px;height:40px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0}
+.sidebar-logo{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:var(--radius-sm);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+.sidebar-title{font-size:15px;font-weight:700;color:#fff}
+.sidebar-sub{font-size:11px;color:var(--sidebar-text-muted);display:block;margin-top:1px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:16px 10px;display:flex;flex-direction:column;gap:16px}
+.nav-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--sidebar-text-muted);padding:0 10px 4px}
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:8.5px 11px;border-radius:var(--radius-sm);color:var(--sidebar-text);font-size:12.5px;font-weight:500;text-align:left;transition:var(--transition);text-decoration:none}
+.nav-item:hover{background:var(--sidebar-item-hover);color:#fff}
+.nav-item.active{background:var(--sidebar-item-active);color:#fff;font-weight:600;border-left:3px solid #3b82f6}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.85}
+.nav-item.active .nav-icon{opacity:1;color:#93c5fd}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700}
+.badge-danger{background:rgba(220,38,38,0.25);color:#fca5a5;border:1px solid rgba(220,38,38,0.35)}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--sidebar-border);display:flex;align-items:center;justify-content:space-between}
+.user-info-box{display:flex;align-items:center;gap:10px;overflow:hidden}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:#2b4875;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.2)}
+.user-name{font-size:12px;font-weight:600;color:#fff}
+.user-role{font-size:10.5px;color:var(--sidebar-text-muted)}
+
+/* MAIN */
+.main-wrapper{margin-left:var(--sidebar-w);width:calc(100% - var(--sidebar-w));min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar-h);background:var(--bg-surface);border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:30}
+.page-title-group h1{font-size:17px;font-weight:700}
+.page-title-group .breadcrumbs{font-size:11.5px;color:var(--text-muted)}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+.lab-clock{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);padding:5px 10px;border-radius:var(--radius-sm);background:var(--bg-subtle);border:1px solid var(--border-light);display:flex;align-items:center;gap:6px}
+.mode-badge{padding:4px 9px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;background:var(--brand-50);border:1px solid var(--brand-100);color:#1e3a68}
+.content-body{padding:24px 28px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.col-12{grid-column:span 12}.col-7{grid-column:span 7}.col-5{grid-column:span 5}
+.lab-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column}
+.lab-card-header{padding:14px 18px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between}
+.lab-card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.lab-card-body{padding:18px}
+.table-container{width:100%;overflow-x:auto;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-surface)}
+.lab-table{width:100%;border-collapse:collapse;text-align:left;font-size:12.5px}
+.lab-table th{background:var(--bg-subtle);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;padding:10px 14px;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+.lab-table td{padding:10px 14px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+.lab-table tbody tr:hover{background-color:var(--bg-subtle)}
+.lab-table .empty-cell{text-align:center;padding:32px 16px;color:var(--text-muted)}
+.form-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+.form-input{width:100%;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border-medium);border-radius:var(--radius-sm);font-size:12.5px;color:var(--text-main);transition:var(--transition)}
+.form-input:focus{border-color:var(--brand-500)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;transition:var(--transition);cursor:pointer}
+.btn-primary{background:#1e3a68;color:#fff;border:1px solid #152c50;text-decoration:none}
+.btn-primary:hover{background:#274c87}
+.btn-secondary{background:var(--bg-subtle);color:var(--text-secondary);border:1px solid var(--border-medium)}
+.btn-secondary:hover{background:var(--border-light)}
+.btn-sm{padding:4px 8px;font-size:11.5px}
+.btn-icon{padding:6px;border-radius:var(--radius-sm);color:var(--text-secondary)}
+.btn-icon:hover{background:var(--bg-subtle)}
+.sample-label-card{border:1px dashed var(--border-medium);background:var(--bg-surface);border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.qr-render-area{padding:10px;background:#fff;border:1px solid #e2e8f0;border-radius:var(--radius-sm);margin:10px 0}
+.qr-render-area canvas{display:block}
+.alert{padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:8px}
+.alert-success{background:var(--ok-bg);border:1px solid var(--ok-border);color:var(--ok-fg)}
+.alert-error{background:var(--ko-bg);border:1px solid var(--ko-border);color:var(--ko-fg)}
+.alert-info{background:var(--info-bg);border:1px solid var(--info-border);color:var(--info-fg)}
+
+/* ✅ Boutons d'action analyse */
+.btn-analyse-physchem{
+  background:linear-gradient(135deg,#0f766e,#115e59);
+  color:#fff;
+  border:1px solid #115e59;
+}
+.btn-analyse-physchem:hover{background:linear-gradient(135deg,#115e59,#134e4a)}
+
+.btn-analyse-micro{
+  background:linear-gradient(135deg,#7c3aed,#6d28d9);
+  color:#fff;
+  border:1px solid #6d28d9;
+}
+.btn-analyse-micro:hover{background:linear-gradient(135deg,#6d28d9,#5b21b6)}
+
+/* ✅ Boutons désactivés */
+.btn:disabled, .btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ✅ Bandeau échantillon sélectionné */
+.selected-sample-banner{
+  display:none;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  background:var(--info-bg);
+  border:1px solid var(--info-border);
+  border-radius:var(--radius-sm);
+  margin-bottom:14px;
+  font-size:12.5px;
+  color:var(--info-fg);
+}
+.selected-sample-banner.show{display:flex}
+.selected-sample-banner code{
+  background:#fff;
+  padding:1px 6px;
+  border-radius:3px;
+  border:1px solid var(--info-border);
+}
+
+@media(max-width:1024px){.col-7,.col-5{grid-column:span 12}}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.25s ease}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .main-wrapper{margin-left:0!important;width:100%!important}
+  .topbar{padding:0 16px}.content-body{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></symbol>
+  <symbol id="icon-sample" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></symbol>
+  <symbol id="icon-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.36 19.34A2 2 0 0 0 6.1 22h11.8a2 2 0 0 0 1.74-2.66L14 9.31V2"></path></symbol>
+  <symbol id="icon-microbe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"></circle></symbol>
+  <symbol id="icon-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path></symbol>
+  <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></symbol>
+  <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></symbol>
+  <symbol id="icon-audit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></symbol>
+  <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></symbol>
+</svg>
+
+<aside class="sidebar" id="appSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <img src="img/logo.png" alt="PRODERMA" class="sidebar-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="sidebar-logo" style="display:none">P</div>
+      <div><div class="sidebar-title">PRODERMA</div><div class="sidebar-sub">LabControl V1.1</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Opérations Analytiques</div>
+    <div class="nav-group">
+      <a class="nav-item" href="dashboard.html"><svg class="nav-icon"><use href="#icon-dash"></use></svg><span>Tableau de bord</span></a>
+      <a class="nav-item active" href="samples.html"><svg class="nav-icon"><use href="#icon-sample"></use></svg><span>Échantillons & QR</span></a>
+    </div>
+    <div class="nav-section-label">Référentiel & Qualité</div>
+    <div class="nav-group">
+      <a class="nav-item" href="standards.html"><svg class="nav-icon"><use href="#icon-book"></use></svg><span>Bibliothèque IANOR</span></a>
+      <a class="nav-item" href="trends.html"><svg class="nav-icon"><use href="#icon-chart"></use></svg><span>PH des produits</span></a>
+      <a class="nav-item" href="oos.html"><svg class="nav-icon"><use href="#icon-alert"></use></svg><span>Anomalies / OOS</span><span class="nav-badge badge-danger" id="navOosBadge" style="display:none">0</span></a>
+    </div>
+    <div class="nav-section-label">Conformité & Système</div>
+    <div class="nav-group">
+      <a class="nav-item" href="import.html"><svg class="nav-icon"><use href="#icon-upload"></use></svg><span>Importer fichiers</span></a>
+      <a class="nav-item" href="history.html"><svg class="nav-icon"><use href="#icon-audit"></use></svg><span>Piste d'audit</span></a>
+      <a class="nav-item" href="users.html"><svg class="nav-icon"><use href="#icon-users"></use></svg><span>Habilitations & Signatures</span></a>
+      <a class="nav-item" href="settings.html"><svg class="nav-icon"><use href="#icon-settings"></use></svg><span>Paramétrage V1.1</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info-box">
+      <div class="user-avatar" id="userInitial">AD</div>
+      <div>
+        <div class="user-name" id="userNameLabel">Administrateur PRODERMA</div>
+        <div class="user-role" id="userRoleLabel">Administrateur</div>
+      </div>
+    </div>
+    <button class="btn-icon" onclick="logout()" title="Déconnexion" style="color:#a8bedb">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="page-title-group">
+      <h1>Échantillons & QR</h1>
+      <div class="breadcrumbs">Enregistrement des prélèvements et génération d'étiquettes</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="lab-clock">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span id="liveTime">--:--:--</span>
+      </div>
+      <div class="mode-badge">RÉFÉRENTIEL IANOR V1.1</div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleLang()">FR / AR</button>
+    </div>
+  </header>
+
+  <div class="content-body">
+
+    <div id="alertBox" style="display:none"></div>
+
+    <!-- ✅ Bandeau : échantillon actif pour les analyses -->
+    <div class="selected-sample-banner" id="selectedSampleBanner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span>Échantillon actif pour analyses :</span>
+      <code id="activeSampleLabel">—</code>
+    </div>
+
+    <div class="grid">
+      <!-- ===== FORMULAIRE ===== -->
+      <div class="col-7 lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-title">
+            <svg width="16" height="16"><use href="#icon-sample"></use></svg>
+            <span>Enregistrement Prélèvement Échantillon</span>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <form id="sampleForm">
+            <div class="form-grid">
+              <div class="form-field" style="grid-column:span 6">
+                <label class="form-label">Désignation Produit *</label>
+                <input class="form-input" name="product" id="sProduct" required>
+              </div>
+              <div class="form-field" style="grid-column:span 6">
+                <label class="form-label">N° de Lot *</label>
+                <input class="form-input font-mono" name="lot" id="sLot" required>
+              </div>
+              <div class="form-field" style="grid-column:span 4">
+                <label class="form-label">Date Prélèvement</label>
+                <input class="form-input" name="date" id="sDate" type="date">
+              </div>
+              <div class="form-field" style="grid-column:span 4">
+                <label class="form-label">Préleveur habilité</label>
+                <select class="form-select" name="sampler" id="sSampler" required>
+                  <option value="Zekri Anfel">Zekri Anfel</option>
+                  <option value="Belabes Islem">Belabes Islem</option>
+                  <option value="Saadi Nouria">Saadi Nouria</option>
+                  <option value="Ali Rabah Romaissa">Ali Rabah Romaissa</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 4">
+                <label class="form-label">Quantité prélevée</label>
+                <input class="form-input" name="qty" id="sQty">
+              </div>
+              <div class="form-field" style="grid-column:span 12">
+                <label class="form-label">Emplacement Échantillothèque</label>
+                <input class="form-input" name="loc" id="sLoc" value="Échantillothèque Générale">
+              </div>
+            </div>
+
+            <!-- ✅ Boutons d'action -->
+            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+              <button type="submit" class="btn btn-primary" style="flex:1;min-width:180px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Enregistrer & Générer QR
+              </button>
+
+              <!-- ✅ Bouton Physico-chimie -->
+              <button type="button" class="btn btn-analyse-physchem" id="btnPhyschem" style="flex:1;min-width:180px" onclick="goToPhyschem()" disabled title="Enregistrez d'abord un échantillon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.36 19.34A2 2 0 0 0 6.1 22h11.8a2 2 0 0 0 1.74-2.66L14 9.31V2"></path></svg>
+                Analyse Physico-chimie
+              </button>
+
+              <!-- ✅ Bouton Microbiologie -->
+              <button type="button" class="btn btn-analyse-micro" id="btnMicro" style="flex:1;min-width:180px" onclick="goToMicro()" disabled title="Enregistrez d'abord un échantillon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"></circle></svg>
+                Analyse Microbiologie
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== QR CODE ===== -->
+      <div class="col-5 lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-title">Étiquette Échantillon & QR</div>
+          <button class="btn btn-secondary btn-sm" onclick="printSampleLabel()">Imprimer</button>
+        </div>
+        <div class="lab-card-body sample-label-card">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);font-weight:700;margin-bottom:8px">
+            PRODERMA LABORATOIRE QC • NA 369:2013
+          </div>
+          <div class="qr-render-area" id="qrBox">
+            <div style="width:180px;height:180px;display:grid;place-items:center;color:var(--text-muted);font-size:11px">
+              Sélectionnez un échantillon
+            </div>
+          </div>
+          <div class="font-mono" id="qrText" style="font-size:11.5px;color:var(--text-secondary);word-break:break-all;text-align:center"></div>
+        </div>
+      </div>
+
+      <!-- ===== TABLEAU ÉCHANTILLOTHÈQUE ===== -->
+      <div class="col-12 lab-card">
+        <div class="lab-card-header">
+          <div class="lab-card-title">
+            Échantillothèque
+            <span id="sampleCount" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:8px">(0 échantillon(s))</span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="lab-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Produit</th>
+                <th>N° Lot</th>
+                <th>Date Prélèvement</th>
+                <th>Préleveur</th>
+                <th>Quantité</th>
+                <th>Emplacement</th>
+                <th style="text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="samplesBody">
+              <tr><td colspan="8" class="empty-cell">Aucun échantillon enregistré.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bibliothèque QR -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+<script>
+const DBKEY = "proderma_labcontrol_v1";
+
+/* ============================================================
+   ✅ ÉTAT GLOBAL : échantillon actif pour les analyses
+   ============================================================ */
+let activeSample = null;
+let samples = loadSamplesFromStorage();
+
+/* ===== Session utilisateur ===== */
+function loadUser(){
+  const u = sessionStorage.getItem("proderma_user");
+  if(!u) return;
+  const user = JSON.parse(u);
+  const displayName = user.name || user.login || "Administrateur";
+  document.getElementById("userNameLabel").textContent = displayName;
+  document.getElementById("userRoleLabel").textContent = user.role || "QC";
+  document.getElementById("userInitial").textContent = displayName.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  const samplerSelect = document.getElementById("sSampler");
+  if(samplerSelect){
+    const match = Array.from(samplerSelect.options).find(o => o.value.toLowerCase() === displayName.toLowerCase());
+    if(match) samplerSelect.value = match.value;
+  }
+}
+loadUser();
+
+function loadSamplesFromStorage(){
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  if(!s.samples) s.samples = [];
+  return s.samples;
+}
+
+function saveSamplesToStorage(list){
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  s.samples = list;
+  localStorage.setItem(DBKEY, JSON.stringify(s));
+}
+
+/* ===== Horloge ===== */
+setInterval(() => {
+  const d = new Date();
+  const el = document.getElementById("liveTime");
+  if (el) el.textContent = d.toLocaleTimeString('fr-FR', { hour12: false });
+}, 1000);
+
+function logout() {
+  if (confirm("Confirmez-vous la déconnexion ?")) {
+    sessionStorage.removeItem("proderma_user");
+    window.location.href = "index.html";
+  }
+}
+function toggleLang() {
+  document.documentElement.dir = document.documentElement.dir === "rtl" ? "ltr" : "rtl";
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+function showAlert(msg, type) {
+  const box = document.getElementById("alertBox");
+  box.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : (type === 'info' ? 'info' : 'error')}">${esc(msg)}</div>`;
+  box.style.display = "block";
+  setTimeout(() => { box.style.display = "none"; }, 5000);
+}
+
+/* ============================================================
+   ✅ ACTIVATION DES BOUTONS D'ANALYSE
+   ============================================================ */
+function refreshAnalysisButtons(){
+  const hasActive = !!(activeSample && activeSample.product && activeSample.lot);
+
+  const btnP = document.getElementById("btnPhyschem");
+  const btnM = document.getElementById("btnMicro");
+  btnP.disabled = !hasActive;
+  btnM.disabled = !hasActive;
+
+  const banner = document.getElementById("selectedSampleBanner");
+  const label  = document.getElementById("activeSampleLabel");
+
+  if(hasActive){
+    banner.classList.add("show");
+    label.textContent = `${activeSample.product} — Lot ${activeSample.lot} (${activeSample.id})`;
+    btnP.title = `Analyser ${activeSample.product} (lot ${activeSample.lot}) en physico-chimie`;
+    btnM.title = `Analyser ${activeSample.product} (lot ${activeSample.lot}) en microbiologie`;
+  } else {
+    banner.classList.remove("show");
+    label.textContent = "—";
+    btnP.title = "Enregistrez d'abord un échantillon";
+    btnM.title = "Enregistrez d'abord un échantillon";
+  }
+}
+
+/* ============================================================
+   ✅ DÉFINIR L'ÉCHANTILLON ACTIF
+   ============================================================ */
+function setActiveSample(sample){
+  activeSample = sample ? {
+    id:      sample.id,
+    product: sample.product,
+    lot:     sample.lot,
+    date:    sample.date,
+    sampler: sample.sampler,
+    qty:     sample.qty,
+    loc:     sample.loc
+  } : null;
+
+  // Persistance de la sélection (utile si on revient sur la page)
+  if(activeSample) sessionStorage.setItem("proderma_active_sample", JSON.stringify(activeSample));
+  else sessionStorage.removeItem("proderma_active_sample");
+
+  refreshAnalysisButtons();
+  if(activeSample) generateQR(activeSample);
+}
+
+/* ===== QR Code ===== */
+function generateQR(sample) {
+  if (!sample) return;
+  const qrBox = document.getElementById("qrBox");
+  const qrText = document.getElementById("qrText");
+  if (!qrBox) return;
+
+  const payload = [
+    "PRODERMA QC",
+    "Lot: " + (sample.lot || ""),
+    "Produit: " + (sample.product || ""),
+    "ID: " + (sample.id || ""),
+    "Date: " + (sample.date || ""),
+    "Preleveur: " + (sample.sampler || "QC"),
+    "Stockage: " + (sample.loc || "Echantillotheque")
+  ].join("\n");
+
+  if (qrText) {
+    qrText.innerHTML = `<strong>ID:</strong> ${esc(sample.id)} • <strong>Lot:</strong> <code>${esc(sample.lot)}</code> • ${esc(sample.date)}`;
+  }
+
+  try {
+    if (typeof qrcode !== "function") {
+      qrBox.innerHTML = `<div style="color:var(--warn-fg);font-size:11px;padding:20px;text-align:center">⚠ Bibliothèque QR non chargée.</div>`;
+      return;
+    }
+    const qr = qrcode(0, "M");
+    qr.addData(payload);
+    qr.make();
+
+    const moduleCount = qr.getModuleCount();
+    const scale = 6, margin = 4;
+    const totalSize = (moduleCount + margin * 2) * scale;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = totalSize;
+    canvas.height = totalSize;
+    canvas.style.width = "180px";
+    canvas.style.height = "180px";
+    canvas.style.display = "block";
+    canvas.style.margin = "0 auto";
+    canvas.style.background = "#fff";
+    canvas.style.borderRadius = "4px";
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, totalSize, totalSize);
+    ctx.fillStyle = "#000";
+    for (let r = 0; r < moduleCount; r++) {
+      for (let c = 0; c < moduleCount; c++) {
+        if (qr.isDark(r, c)) {
+          ctx.fillRect((c + margin) * scale, (r + margin) * scale, scale, scale);
+        }
+      }
+    }
+
+    qrBox.innerHTML = "";
+    qrBox.appendChild(canvas);
+  } catch (err) {
+    console.error("Erreur QR:", err);
+    qrBox.innerHTML = `<div style="color:var(--ko-fg);font-size:11px;padding:20px;text-align:center">Erreur QR : ${esc(err.message || err)}</div>`;
+  }
+}
+
+/* ============================================================
+   ✅ "Sélectionner" sur une ligne du tableau
+   ============================================================ */
+function showQRFromRow(btn) {
+  const tr = btn.closest("tr");
+  const data = JSON.parse(tr.dataset.sample);
+  setActiveSample(data);
+  renderTable();
+  showAlert(`Échantillon actif : ${data.product} — Lot ${data.lot}. Vous pouvez lancer une analyse.`, "info");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function printSampleLabel() {
+  const canvas = document.querySelector("#qrBox canvas");
+  if (!canvas) {
+    alert("Aucun QR code à imprimer. Sélectionnez un échantillon.");
+    return;
+  }
+  const qrImage = canvas.toDataURL("image/png");
+  const qrText = document.getElementById("qrText").textContent || "";
+
+  const w = window.open("", "_blank", "width=480,height=560");
+  w.document.write(`<!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Étiquette Échantillon</title>
+    <style>
+      body{font-family:Inter,Arial,sans-serif;text-align:center;padding:24px;color:#111}
+      .label-box{border:2px solid #1e3a68;border-radius:10px;padding:20px;max-width:340px;margin:0 auto}
+      .header{font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#1e3a68;border-bottom:2px solid #1e3a68;padding-bottom:8px;margin-bottom:12px}
+      img{width:180px;height:180px;margin:12px auto;display:block;border:1px solid #e5ebf3;border-radius:6px;padding:6px;background:#fff}
+      .meta{font-size:11px;line-height:1.6;color:#333;border-top:1px solid #eee;padding-top:8px;margin-top:8px;text-align:left}
+    </style>
+  </head>
+  <body>
+    <div class="label-box">
+      <div class="header">PRODERMA • LABORATOIRE QC</div>
+      <img src="${qrImage}">
+      <div class="meta">${esc(qrText)}</div>
+    </div>
+  </body>
+  </html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); w.close(); }, 400);
+}
+
+/* ===== Rendu du tableau ===== */
+function renderTable() {
+  const tbody = document.getElementById("samplesBody");
+  const countEl = document.getElementById("sampleCount");
+
+  if (samples.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">Aucun échantillon enregistré.</td></tr>';
+    countEl.textContent = "(0 échantillon(s))";
+    return;
+  }
+
+  countEl.textContent = `(${samples.length} échantillon(s))`;
+
+  tbody.innerHTML = samples.map(s => {
+    const qrData = JSON.stringify({
+      id: s.id,
+      lot: s.lot,
+      product: s.product,
+      date: s.date,
+      sampler: s.sampler,
+      qty: s.qty,
+      loc: s.loc
+    });
+    const isActive = activeSample && activeSample.id === s.id;
+    return `
+      <tr data-sample='${esc(qrData)}' style="${isActive ? 'background:#eef5fc;' : ''}">
+        <td><code>${esc(s.id)}</code>${isActive ? ' <span style="color:#1d5290;font-weight:700;font-size:10px">● ACTIF</span>' : ''}</td>
+        <td><strong>${esc(s.product)}</strong></td>
+        <td><code>${esc(s.lot)}</code></td>
+        <td>${esc(s.date)}</td>
+        <td>${esc(s.sampler)}</td>
+        <td>${esc(s.qty)}</td>
+        <td>${esc(s.loc)}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn btn-secondary btn-sm" onclick="showQRFromRow(this)" style="margin-right:4px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:3px">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Sélectionner
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="deleteSample('${s.id}')" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5" title="Supprimer">✕</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+/* ============================================================
+   ✅ SOUMISSION DU FORMULAIRE
+   ⚠️ MODIFICATION CLÉ : on ne vide PLUS les champs
+       Produit / Lot / Quantité après enregistrement.
+       Ils restent affichés pour permettre l'analyse immédiate.
+   ============================================================ */
+document.getElementById("sampleForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const product = document.getElementById("sProduct").value.trim();
+  const lot = document.getElementById("sLot").value.trim();
+
+  if (!product || !lot) {
+    showAlert("Le produit et le N° de lot sont obligatoires.", "error");
+    return;
+  }
+
+  const now = new Date();
+  const id = "S-" + String(Math.floor(Date.now() / 1000)).slice(-8);
+
+  const newSample = {
+    id: id,
+    product: product,
+    lot: lot,
+    date: document.getElementById("sDate").value || now.toISOString().slice(0, 10),
+    sampler: document.getElementById("sSampler").value || "Zekri Anfel",
+    qty: document.getElementById("sQty").value.trim() || "—",
+    loc: document.getElementById("sLoc").value.trim() || "Échantillothèque Générale"
+  };
+
+  samples.unshift(newSample);
+  saveSamplesToStorage(samples);
+
+  try{
+    const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+    if(!s.history) s.history = [];
+    const pad = n => String(n).padStart(2,'0');
+    const ts = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const user = sessionStorage.getItem("proderma_user") ? JSON.parse(sessionStorage.getItem("proderma_user")) : {login:"admin"};
+    s.history.unshift({
+      ts,
+      user: user.login || "admin",
+      action: "Échantillon créé",
+      detail: `${lot} — ${product}`
+    });
+    localStorage.setItem(DBKEY, JSON.stringify(s));
+  } catch(err){ console.error("Erreur historique:", err); }
+
+  /* ✅ L'échantillon créé devient l'échantillon actif */
+  setActiveSample(newSample);
+
+  renderTable();
+  showAlert(`✅ Échantillon enregistré : ${lot} — ${product}. Vous pouvez lancer l'analyse.`, "success");
+
+  /* ✅ IMPORTANT : on NE vide PAS les champs Produit, Lot, Quantité.
+     L'utilisateur garde ses valeurs saisies et peut enchaîner
+     directement sur "Analyse Physico-chimie" ou "Analyse Microbiologie".
+     On replace simplement le focus sur le champ Produit pour
+     une éventuelle nouvelle saisie. */
+  document.getElementById("sProduct").focus();
+  document.getElementById("sProduct").select();
+});
+
+/* ============================================================
+   ✅ REDIRECTION VERS physchem.html / micro.html
+   On utilise `activeSample` (pas les champs du formulaire).
+   ============================================================ */
+function goToPhyschem(){
+  if(!activeSample){
+    showAlert("⚠ Veuillez d'abord enregistrer (ou sélectionner) un échantillon.", "error");
+    return;
+  }
+  sessionStorage.setItem("proderma_prefill_physchem", JSON.stringify(activeSample));
+  window.location.href = "physchem.html";
+}
+
+function goToMicro(){
+  if(!activeSample){
+    showAlert("⚠ Veuillez d'abord enregistrer (ou sélectionner) un échantillon.", "error");
+    return;
+  }
+  sessionStorage.setItem("proderma_prefill_micro", JSON.stringify(activeSample));
+  window.location.href = "micro.html";
+}
+
+/* ===== Initialisation ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("sDate").value = new Date().toISOString().slice(0, 10);
+  renderTable();
+
+  // Restaure l'échantillon actif s'il y en a un en session
+  const savedActive = sessionStorage.getItem("proderma_active_sample");
+  if(savedActive){
+    try {
+      const s = JSON.parse(savedActive);
+      // On s'assure que l'échantillon existe toujours dans la base
+      if(samples.find(x => x.id === s.id)) {
+        setActiveSample(s);
+        // ✅ On recharge aussi les champs du formulaire avec cet échantillon
+        //    pour rester cohérent avec l'affichage.
+        document.getElementById("sProduct").value = s.product || "";
+        document.getElementById("sLot").value = s.lot || "";
+        document.getElementById("sQty").value = (s.qty && s.qty !== "—") ? s.qty : "";
+        if(s.date) document.getElementById("sDate").value = s.date;
+        if(s.sampler) document.getElementById("sSampler").value = s.sampler;
+        if(s.loc) document.getElementById("sLoc").value = s.loc;
+      }
+    } catch(e){}
+  } else if(samples.length > 0) {
+    // Sinon, on active le plus récent
+    const mostRecent = samples[0];
+    setActiveSample(mostRecent);
+    document.getElementById("sProduct").value = mostRecent.product || "";
+    document.getElementById("sLot").value = mostRecent.lot || "";
+    document.getElementById("sQty").value = (mostRecent.qty && mostRecent.qty !== "—") ? mostRecent.qty : "";
+    if(mostRecent.date) document.getElementById("sDate").value = mostRecent.date;
+    if(mostRecent.sampler) document.getElementById("sSampler").value = mostRecent.sampler;
+    if(mostRecent.loc) document.getElementById("sLoc").value = mostRecent.loc;
+  }
+
+  refreshAnalysisButtons();
+});
+
+/* ===== Supprimer un échantillon ===== */
+function deleteSample(id) {
+  if (!confirm("Confirmer la suppression de cet échantillon ?")) return;
+  const idx = samples.findIndex(s => s.id === id);
+  if (idx < 0) return;
+  const removed = samples.splice(idx, 1)[0];
+  saveSamplesToStorage(samples);
+
+  try{
+    const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+    if(!s.history) s.history = [];
+    const now = new Date(), pad = n => String(n).padStart(2,'0');
+    const ts = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const user = sessionStorage.getItem("proderma_user") ? JSON.parse(sessionStorage.getItem("proderma_user")) : {login:"admin"};
+    s.history.unshift({
+      ts,
+      user: user.login || "admin",
+      action: "Échantillon supprimé",
+      detail: `${removed.lot} — ${removed.product}`
+    });
+    localStorage.setItem(DBKEY, JSON.stringify(s));
+  } catch(e){ console.error(e); }
+
+  // Si on supprime l'échantillon actif, on le désélectionne
+  if(activeSample && activeSample.id === id) setActiveSample(null);
+
+  renderTable();
+  showAlert("✅ Échantillon supprimé.", "success");
+}
+</script>
+</body>
+</html>

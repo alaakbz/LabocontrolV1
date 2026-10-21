@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anomalies / OOS — PRODERMA LabControl</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand-950:#0f1f38;--brand-900:#142848;--brand-500:#427edb;--brand-100:#e7effa;--brand-50:#f2f7fd;
+  --sidebar-w:260px;--sidebar-bg:#182b45;--sidebar-border:rgba(255,255,255,0.1);
+  --sidebar-text:#d8e4f2;--sidebar-text-muted:#8ba2c2;--sidebar-item-active:#25406b;--sidebar-item-hover:rgba(255,255,255,0.08);
+  --bg-app:#f6f8fb;--bg-surface:#ffffff;--bg-subtle:#f1f4f9;
+  --border-light:#e5ebf3;--border-subtle:#d8e2ee;--border-medium:#b9c9dc;--border-focus:#3b74c4;
+  --text-main:#131b26;--text-secondary:#4a5b73;--text-muted:#74859d;
+  --ok-fg:#0d6842;--ok-bg:#ebf7f1;--ok-border:#a4ddc4;--ko-fg:#ad1818;--ko-bg:#fdf2f2;--ko-border:#f8b4b4;
+  --warn-fg:#9a5b00;--warn-bg:#fff8eb;--warn-border:#fed79e;--info-fg:#1d5290;--info-bg:#eef5fc;--info-border:#b9d7f5;
+  --shadow-sm:0 1px 2px 0 rgba(19,27,38,0.04);--shadow-md:0 4px 6px -1px rgba(19,27,38,0.05);
+  --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--topbar-h:62px;--transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',sans-serif;background:var(--bg-app);color:var(--text-main);line-height:1.45;min-height:100vh;overflow-x:hidden}
+code,.font-mono{font-family:'JetBrains Mono',monospace}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--border-focus);outline-offset:1px}
+
+/* SIDEBAR */
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;z-index:40;border-right:1px solid var(--sidebar-border);user-select:none}
+.sidebar-header{padding:20px 18px 18px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar-brand{display:flex;align-items:center;gap:12px}
+.sidebar-logo-img{width:40px;height:40px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0}
+.sidebar-logo{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:var(--radius-sm);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+.sidebar-title{font-size:15px;font-weight:700;color:#fff}
+.sidebar-sub{font-size:11px;color:var(--sidebar-text-muted);display:block;margin-top:1px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:16px 10px;display:flex;flex-direction:column;gap:16px}
+.nav-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--sidebar-text-muted);padding:0 10px 4px}
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:8.5px 11px;border-radius:var(--radius-sm);color:var(--sidebar-text);font-size:12.5px;font-weight:500;text-align:left;transition:var(--transition);text-decoration:none}
+.nav-item:hover{background:var(--sidebar-item-hover);color:#fff}
+.nav-item.active{background:var(--sidebar-item-active);color:#fff;font-weight:600;border-left:3px solid #3b82f6}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.85}
+.nav-item.active .nav-icon{opacity:1;color:#93c5fd}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700}
+.badge-danger{background:rgba(220,38,38,0.25);color:#fca5a5;border:1px solid rgba(220,38,38,0.35)}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--sidebar-border);display:flex;align-items:center;justify-content:space-between}
+.user-info-box{display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:#2b4875;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.2)}
+.user-name{font-size:12px;font-weight:600;color:#fff}
+.user-role{font-size:10.5px;color:var(--sidebar-text-muted)}
+
+/* MAIN */
+.main-wrapper{margin-left:var(--sidebar-w);width:calc(100% - var(--sidebar-w));min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar-h);background:var(--bg-surface);border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:30}
+.page-title-group h1{font-size:17px;font-weight:700}
+.page-title-group .breadcrumbs{font-size:11.5px;color:var(--text-muted)}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+.lab-clock{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);padding:5px 10px;border-radius:var(--radius-sm);background:var(--bg-subtle);border:1px solid var(--border-light);display:flex;align-items:center;gap:6px}
+.mode-badge{padding:4px 9px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;background:var(--brand-50);border:1px solid var(--brand-100);color:#1e3a68}
+.content-body{padding:24px 28px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.col-12{grid-column:span 12}
+.col-6{grid-column:span 6}
+.col-4{grid-column:span 4}
+.col-3{grid-column:span 3}
+
+/* CARDS */
+.lab-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px}
+.lab-card-header{padding:14px 18px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.lab-card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.lab-card-subtitle{font-size:11.5px;color:var(--text-muted);margin-top:2px}
+.lab-card-body{padding:18px}
+
+/* TABLE */
+.table-container{width:100%;overflow-x:auto;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-surface)}
+.lab-table{width:100%;border-collapse:collapse;text-align:left;font-size:12.5px}
+.lab-table th{background:var(--bg-subtle);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;padding:10px 14px;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+.lab-table td{padding:10px 14px;border-bottom:1px solid var(--border-light)}
+.lab-table tbody tr:hover{background-color:var(--bg-subtle)}
+.lab-table .empty-cell{text-align:center;padding:32px 16px;color:var(--text-muted)}
+
+/* STATUS */
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.status-pill::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%}
+.status-pill.ok{background:var(--ok-bg);color:var(--ok-fg);border:1px solid var(--ok-border)}
+.status-pill.ok::before{background:var(--ok-fg)}
+.status-pill.ko{background:var(--ko-bg);color:var(--ko-fg);border:1px solid var(--ko-border)}
+.status-pill.ko::before{background:var(--ko-fg)}
+.status-pill.wait{background:var(--warn-bg);color:var(--warn-fg);border:1px solid var(--warn-border)}
+.status-pill.wait::before{background:var(--warn-fg)}
+.status-pill.info{background:var(--info-bg);color:var(--info-fg);border:1px solid var(--info-border)}
+.status-pill.info::before{background:var(--info-fg)}
+.status-pill.eau{background:#e0f2fe;color:#075985;border:1px solid #7dd3fc}
+.status-pill.eau::before{background:#075985}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border-medium);border-radius:var(--radius-sm);font-size:12.5px;color:var(--text-main);transition:var(--transition)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--brand-500)}
+.form-textarea{min-height:72px;resize:vertical}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;transition:var(--transition)}
+.btn-primary{background:#1e3a68;color:#fff;border:1px solid #152c50}
+.btn-primary:hover{background:#274c87}
+.btn-secondary{background:var(--bg-subtle);color:var(--text-secondary);border:1px solid var(--border-medium)}
+.btn-secondary:hover{background:var(--border-light)}
+.btn-danger{background:#b91c1c;color:#fff;border:1px solid #991b1b}
+.btn-danger:hover{background:#991b1b}
+.btn-success{background:#0f766e;color:#fff;border:1px solid #115e59}
+.btn-success:hover{background:#115e59}
+.btn-sm{padding:4px 8px;font-size:11.5px}
+.btn-icon{padding:6px;border-radius:var(--radius-sm);color:var(--text-secondary)}
+.btn-icon:hover{background:var(--bg-subtle)}
+
+/* MISC */
+.small{font-size:11px;color:var(--text-muted)}
+.notice-banner{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--warn-fg);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+
+/* ✅ Bloc Eau — visible uniquement si "Eau — Rupture d'approvisionnement" est sélectionné */
+#eauBlock{
+  display:none;
+  grid-column:span 12;
+  background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
+  border:1px solid #7dd3fc;
+  border-radius:var(--radius-sm);
+  padding:14px;
+  margin-top:4px;
+}
+#eauBlock.active{display:block}
+#eauBlock .eau-title{
+  font-size:12px;
+  font-weight:800;
+  color:#075985;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#eauBlock .eau-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+
+@media(max-width:1024px){
+  .col-6,.col-4,.col-3{grid-column:span 12}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.25s ease}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .main-wrapper{margin-left:0!important;width:100%!important}
+  .topbar{padding:0 16px}
+  .content-body{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></symbol>
+  <symbol id="icon-sample" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></symbol>
+  <symbol id="icon-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.36 19.34A2 2 0 0 0 6.1 22h11.8a2 2 0 0 0 1.74-2.66L14 9.31V2"></path><line x1="8" y1="2" x2="16" y2="2"></line><line x1="8" y1="14" x2="16" y2="14"></line></symbol>
+  <symbol id="icon-microbe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line></symbol>
+  <symbol id="icon-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></symbol>
+  <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+  <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></symbol>
+  <symbol id="icon-audit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></symbol>
+  <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></symbol>
+  <symbol id="icon-water" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></symbol>
+</svg>
+
+<aside class="sidebar" id="appSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <img src="img/logo.png" alt="PRODERMA" class="sidebar-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="sidebar-logo" style="display:none">P</div>
+      <div><div class="sidebar-title">PRODERMA</div><div class="sidebar-sub">LabControl V1.1</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Opérations Analytiques</div>
+    <div class="nav-group">
+      <a class="nav-item" href="dashboard.html"><svg class="nav-icon"><use href="#icon-dash"></use></svg><span>Tableau de bord</span></a>
+      <a class="nav-item" href="micro.html"><svg class="nav-icon"><use href="#icon-microbe"></use></svg><span>Microbiologie</span></a>
+    </div>
+    <div class="nav-section-label">Référentiel & Qualité</div>
+    <div class="nav-group">
+      <a class="nav-item" href="standards.html"><svg class="nav-icon"><use href="#icon-book"></use></svg><span>Bibliothèque IANOR</span></a>
+      <a class="nav-item" href="trends.html"><svg class="nav-icon"><use href="#icon-chart"></use></svg><span>PH des produits</span></a>
+      <a class="nav-item active" href="oos.html"><svg class="nav-icon"><use href="#icon-alert"></use></svg><span>Anomalies / OOS</span><span class="nav-badge badge-danger" id="navOosBadge" style="display:none">0</span></a>
+    </div>
+    <div class="nav-section-label">Conformité & Système</div>
+    <div class="nav-group">
+      <a class="nav-item" href="import.html"><svg class="nav-icon"><use href="#icon-upload"></use></svg><span>Importer fichiers</span></a>
+      <a class="nav-item" href="users.html"><svg class="nav-icon"><use href="#icon-users"></use></svg><span>Habilitations & Signatures</span></a>
+      <a class="nav-item" href="settings.html"><svg class="nav-icon"><use href="#icon-settings"></use></svg><span>Paramétrage V1.1</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info-box">
+      <div class="user-avatar" id="userInitial">AD</div>
+      <div><div class="user-name" id="userNameLabel">Administrateur</div><div class="user-role" id="userRoleLabel">QC Superviseur</div></div>
+    </div>
+    <button class="btn-icon" onclick="logout()" title="Déconnexion" style="color:#a8bedb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="page-title-group">
+      <h1>Anomalies / OOS</h1>
+      <div class="breadcrumbs">Registre des déviations et investigations</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="lab-clock"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span id="liveTime">--:--:--</span></div>
+      <div class="mode-badge">RÉFÉRENTIEL IANOR V1.1</div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleLang()">FR / AR</button>
+    </div>
+  </header>
+
+  <div class="content-body">
+
+    <!-- ===== FORMULAIRE D'ENREGISTREMENT OOS ===== -->
+    <div class="lab-card">
+      <div class="lab-card-header">
+        <div>
+          <div class="lab-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+            Enregistrer une anomalie / OOS
+          </div>
+          <div class="lab-card-subtitle">Saisie manuelle d'une déviation analytique, d'un incident qualité ou d'une rupture d'approvisionnement eau</div>
+        </div>
+        <span class="status-pill ko" id="formStatusBadge">Nouveau</span>
+      </div>
+      <div class="lab-card-body">
+        <div class="form-grid">
+          <div class="form-field" style="grid-column:span 2">
+            <label class="form-label">Date de signalement</label>
+            <input class="form-input" id="oosDate" type="date">
+          </div>
+          <div class="form-field" style="grid-column:span 2">
+            <label class="form-label">N° de Lot <span id="lotRequiredMark">*</span></label>
+            <input class="form-input font-mono" id="oosLot" placeholder="Saisir le n° de lot">
+          </div>
+          <div class="form-field" style="grid-column:span 3">
+            <label class="form-label">Produit <span id="productRequiredMark">*</span></label>
+            <input class="form-input" id="oosProduct" placeholder="Nom du produit">
+          </div>
+          <div class="form-field" style="grid-column:span 2">
+            <label class="form-label">Type d'anomalie</label>
+            <select class="form-select" id="oosCategory" onchange="onOosCategoryChange()">
+              <option>Hors spécification (OOS)</option>
+              <option>Hors tendance (OOT)</option>
+              <option>Écart BPL</option>
+              <option>Anomalie matériel</option>
+              <option>Non-conformité documentaire</option>
+              <option>Eau — Rupture d'approvisionnement</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="form-field" style="grid-column:span 3">
+            <label class="form-label">Paramètre déviant <span id="paramRequiredMark">*</span></label>
+            <input class="form-input" id="oosParam" placeholder="Ex. pH, Viscosité, E. coli...">
+          </div>
+
+          <div class="form-field" style="grid-column:span 3">
+            <label class="form-label">Valeur constatée <span id="valueRequiredMark">*</span></label>
+            <input class="form-input font-mono" id="oosValue" placeholder="Ex. 3.50 pH">
+          </div>
+          <div class="form-field" style="grid-column:span 3">
+            <label class="form-label">Valeur attendue / spécification</label>
+            <input class="form-input font-mono" id="oosExpected" placeholder="Ex. 5.5 — 7.5 pH">
+          </div>
+          <div class="form-field" style="grid-column:span 2">
+            <label class="form-label">Criticité</label>
+            <select class="form-select" id="oosSeverity" onchange="onOosSeverityChange()">
+              <option value="Majeure">Majeure (blocage)</option>
+              <option value="Mineure">Mineure (à surveiller)</option>
+            </select>
+          </div>
+          <div class="form-field" style="grid-column:span 2">
+            <label class="form-label">Statut du lot</label>
+            <select class="form-select" id="oosLotStatus">
+              <option>Bloqué</option>
+              <option>En quarantaine</option>
+              <option>Libéré sous conditions</option>
+              <option>En investigation</option>
+            </select>
+          </div>
+          <div class="form-field" style="grid-column:span 2">
+            <label class="form-label">Détecté par</label>
+            <input class="form-input" id="oosDetectedBy" placeholder="Opérateur / QC">
+          </div>
+
+          <!-- ===== ✅ BLOC EAU (visible uniquement si type = Eau — Rupture d'approvisionnement) ===== -->
+          <div id="eauBlock">
+            <div class="eau-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+              Signalement Eau — Rupture d'approvisionnement
+            </div>
+            <div class="eau-grid">
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Date / heure de la rupture</label>
+                <input class="form-input" id="eauDateRupture" type="datetime-local">
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Origine de l'eau concernée</label>
+                <select class="form-select" id="eauOrigine">
+                  <option>Réseau ville</option>
+                  <option>Forage</option>
+                  <option>Eau purifiée (EP)</option>
+                  <option>Eau osmosée</option>
+                  <option>Eau adoucie</option>
+                  <option>Autre</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Point de distribution impacté</label>
+                <input class="form-input" id="eauPoint" placeholder="Ex. Salle de production 1, laveur...">
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Durée estimée de la rupture</label>
+                <input class="form-input" id="eauDuree" placeholder="Ex. 2h, 1 jour, indéterminée">
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Volume / quantité impactée</label>
+                <input class="form-input" id="eauVolume" placeholder="Ex. 500 L, 1 lot, toute la production">
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Cause identifiée / présumée</label>
+                <select class="form-select" id="eauCause">
+                  <option>Non identifiée</option>
+                  <option>Coupure réseau</option>
+                  <option>Panne pompe</option>
+                  <option>Maintenance programmée</option>
+                  <option>Panne générateur EP</option>
+                  <option>Contamination détectée</option>
+                  <option>Autre</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Impact production</label>
+                <select class="form-select" id="eauImpact">
+                  <option>Arrêt total production</option>
+                  <option>Arrêt partiel</option>
+                  <option>Production continue (à vérifier)</option>
+                  <option>Aucun impact direct</option>
+                </select>
+              </div>
+              <div class="form-field" style="grid-column:span 3">
+                <label class="form-label">Lots impactés (n° séparés par virgule)</label>
+                <input class="form-input font-mono" id="eauLotsImpactes" placeholder="Ex. LOT001, LOT002">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-field" style="grid-column:span 6">
+            <label class="form-label">Description détaillée de l'anomalie</label>
+            <textarea class="form-textarea" id="oosDescription" placeholder="Décrire précisément les circonstances de découverte, les conditions d'analyse, les valeurs observées..."></textarea>
+          </div>
+          <div class="form-field" style="grid-column:span 6">
+            <label class="form-label">Investigation QA / Actions immédiates</label>
+            <textarea class="form-textarea" id="oosInvestigation" placeholder="Ex. Investigation ouverte, échantillon ré-analysé, suspension conditionnement..."></textarea>
+          </div>
+
+          <div class="form-field" style="grid-column:span 4">
+            <label class="form-label">Action corrective proposée</label>
+            <input class="form-input" id="oosCorrective" placeholder="Ex. Re-contrôle, destruction, retraitement...">
+          </div>
+          <div class="form-field" style="grid-column:span 4">
+            <label class="form-label">Responsable investigation</label>
+            <input class="form-input" id="oosOwner" placeholder="Nom du responsable QA">
+          </div>
+          <div class="form-field" style="grid-column:span 4">
+            <label class="form-label">Date limite de résolution</label>
+            <input class="form-input" id="oosDueDate" type="date">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn btn-primary" onclick="saveOOS()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Enregistrer l'anomalie
+          </button>
+          <button class="btn btn-secondary" onclick="resetOOSForm()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            Effacer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REGISTRE DES OOS ===== -->
+    <div class="lab-card">
+      <div class="lab-card-header">
+        <div>
+          <div class="lab-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            Registre OOS & Déviations
+          </div>
+          <div class="lab-card-subtitle">Historique complet des anomalies avec traçabilité</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="oosSearch" placeholder="Rechercher par lot ou produit..." oninput="renderOOS()" style="width:240px">
+          <span id="oosCountBadge" class="status-pill ko">0 anomalie(s)</span>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="lab-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>N° Lot</th>
+              <th>Produit</th>
+              <th>Type</th>
+              <th>Paramètre</th>
+              <th>Valeur</th>
+              <th>Criticité</th>
+              <th>Statut Lot</th>
+              <th>Investigation</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="oosBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const DBKEY = "proderma_labcontrol_v1";
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+
+function badge(s) {
+  let c = "wait", label = s;
+  if (s === "Conforme" || s === "Libéré") c = "ok";
+  else if (s === "Non conforme" || s === "Bloqué" || s === "Critique" || s === "Majeure") c = "ko";
+  else if (s === "Mineure" || s === "En investigation" || s === "En quarantaine") c = "wait";
+  else if (s === "Libéré sous conditions") c = "info";
+  else if (s === "Eau — Rupture d'approvisionnement") c = "eau";
+  else label = s || "À vérifier";
+  return `<span class="status-pill ${c}">${esc(label)}</span>`;
+}
+
+/* ===== SESSION ===== */
+function loadUser() {
+  const u = sessionStorage.getItem("proderma_user");
+  if (!u) {
+    document.getElementById("userNameLabel").textContent = "Administrateur";
+    document.getElementById("userRoleLabel").textContent = "QC Superviseur";
+    document.getElementById("userInitial").textContent = "AD";
+    return;
+  }
+  const user = JSON.parse(u);
+  document.getElementById("userNameLabel").textContent = user.name;
+  document.getElementById("userRoleLabel").textContent = user.role;
+  document.getElementById("userInitial").textContent = user.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+}
+loadUser();
+
+function logout() {
+  if (confirm("Confirmez la déconnexion ?")) {
+    sessionStorage.removeItem("proderma_user");
+    window.location.href = "index.html";
+  }
+}
+
+function toggleLang() {
+  document.documentElement.dir = document.documentElement.dir === "rtl" ? "ltr" : "rtl";
+}
+
+setInterval(() => {
+  const d = new Date();
+  const el = document.getElementById("liveTime");
+  if (el) el.textContent = d.toLocaleTimeString('fr-FR', { hour12: false });
+}, 1000);
+
+/* ===== CATÉGORIE / SÉVÉRITÉ ===== */
+function onOosCategoryChange() {
+  const cat = document.getElementById("oosCategory").value;
+  const inv = document.getElementById("oosInvestigation");
+  const eauBlock = document.getElementById("eauBlock");
+  const isEau = cat === "Eau — Rupture d'approvisionnement";
+
+  // Afficher / masquer le bloc eau
+  if (eauBlock) eauBlock.classList.toggle("active", isEau);
+
+  // Ajuster les astérisques "champ obligatoire" pour l'eau
+  const lotMark = document.getElementById("lotRequiredMark");
+  const prodMark = document.getElementById("productRequiredMark");
+  const paramMark = document.getElementById("paramRequiredMark");
+  const valMark = document.getElementById("valueRequiredMark");
+
+  if (isEau) {
+    if (lotMark) lotMark.style.display = "none";
+    if (prodMark) prodMark.style.display = "none";
+    if (paramMark) paramMark.style.display = "none";
+    if (valMark) valMark.style.display = "none";
+
+    document.getElementById("oosLot").placeholder = "Facultatif (ex. laissez vide si pas encore de lot)";
+    document.getElementById("oosProduct").placeholder = "Ex. Eau de process / Eau purifiée";
+    document.getElementById("oosParam").placeholder = "Ex. Rupture approvisionnement réseau";
+    document.getElementById("oosValue").placeholder = "Ex. Aucune eau disponible";
+
+    // Pré-remplir avec des valeurs par défaut pertinentes
+    if (!document.getElementById("oosProduct").value.trim()) {
+      document.getElementById("oosProduct").value = "Eau de process";
+    }
+    if (!document.getElementById("oosParam").value.trim()) {
+      document.getElementById("oosParam").value = "Rupture d'approvisionnement";
+    }
+    if (!document.getElementById("oosValue").value.trim()) {
+      document.getElementById("oosValue").value = "Aucune eau disponible";
+    }
+    if (!inv.value) {
+      inv.value = "Investigation ouverte — recherche de la cause de la rupture d'approvisionnement eau (réseau / générateur EP).";
+    }
+    // Statut lot par défaut = En investigation
+    document.getElementById("oosLotStatus").value = "En investigation";
+  } else {
+    if (lotMark) lotMark.style.display = "inline";
+    if (prodMark) prodMark.style.display = "inline";
+    if (paramMark) paramMark.style.display = "inline";
+    if (valMark) valMark.style.display = "inline";
+
+    document.getElementById("oosLot").placeholder = "Saisir le n° de lot";
+    document.getElementById("oosProduct").placeholder = "Nom du produit";
+    document.getElementById("oosParam").placeholder = "Ex. pH, Viscosité, E. coli...";
+    document.getElementById("oosValue").placeholder = "Ex. 3.50 pH";
+
+    if (cat.includes("Hors spécification") && !inv.value) {
+      inv.value = "Investigation OOS ouverte selon procédure QA-08";
+    }
+  }
+}
+
+function onOosSeverityChange() {
+  const sev = document.getElementById("oosSeverity").value;
+  const status = document.getElementById("oosLotStatus");
+  const badgeEl = document.getElementById("formStatusBadge");
+  const isEau = document.getElementById("oosCategory").value === "Eau — Rupture d'approvisionnement";
+
+  if (sev === "Critique") {
+    status.value = "Bloqué";
+    badgeEl.className = "status-pill ko";
+    badgeEl.textContent = "Critique";
+  } else if (sev === "Majeure") {
+    status.value = isEau ? "En investigation" : "En quarantaine";
+    badgeEl.className = "status-pill ko";
+    badgeEl.textContent = "Majeure";
+  } else {
+    status.value = "En investigation";
+    badgeEl.className = "status-pill wait";
+    badgeEl.textContent = "Mineure";
+  }
+}
+
+/* ===== ENREGISTREMENT OOS ===== */
+function saveOOS() {
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  if (!s.oos) s.oos = [];
+  if (!s.history) s.history = [];
+
+  const category = document.getElementById("oosCategory").value;
+  const isEau = category === "Eau — Rupture d'approvisionnement";
+
+  const dateInput = document.getElementById("oosDate").value;
+  const dateFR = dateInput
+    ? (() => { const [y, m, d] = dateInput.split("-"); return `${d}/${m}/${y}`; })()
+    : new Date().toLocaleDateString('fr-FR');
+
+  // ✅ Construction de l'objet avec les champs eau (uniquement si pertinent)
+  const oos = {
+    id: "OOS-" + Date.now().toString().slice(-8),
+    date: dateFR,
+    lot: document.getElementById("oosLot").value.trim(),
+    product: document.getElementById("oosProduct").value.trim(),
+    category: category,
+    param: document.getElementById("oosParam").value.trim(),
+    value: document.getElementById("oosValue").value.trim(),
+    expected: document.getElementById("oosExpected").value.trim(),
+    severity: document.getElementById("oosSeverity").value,
+    status: document.getElementById("oosLotStatus").value,
+    detectedBy: document.getElementById("oosDetectedBy").value.trim(),
+    description: document.getElementById("oosDescription").value.trim(),
+    investigation: document.getElementById("oosInvestigation").value.trim(),
+    corrective: document.getElementById("oosCorrective").value.trim(),
+    owner: document.getElementById("oosOwner").value.trim(),
+    dueDate: document.getElementById("oosDueDate").value,
+    createdAt: new Date().toLocaleString('fr-FR'),
+    user: sessionStorage.getItem("proderma_user") ? JSON.parse(sessionStorage.getItem("proderma_user")).login : "admin"
+  };
+
+  // ✅ Ajout des détails eau si le type est "Eau — Rupture d'approvisionnement"
+  if (isEau) {
+    oos.eau = {
+      dateRupture: document.getElementById("eauDateRupture").value || "",
+      origine: document.getElementById("eauOrigine").value || "",
+      point: document.getElementById("eauPoint").value.trim() || "",
+      duree: document.getElementById("eauDuree").value.trim() || "",
+      volume: document.getElementById("eauVolume").value.trim() || "",
+      cause: document.getElementById("eauCause").value || "",
+      impact: document.getElementById("eauImpact").value || "",
+      lotsImpactes: document.getElementById("eauLotsImpactes").value.trim() || ""
+    };
+  }
+
+  // ✅ Validation : pour l'eau, seuls Produit, Paramètre et Valeur sont requis (pas le lot)
+  const missing = [];
+  if (!isEau && !oos.lot) missing.push("N° de Lot");
+  if (!oos.product) missing.push("Produit");
+  if (!oos.param) missing.push("Paramètre déviant");
+  if (!oos.value) missing.push("Valeur constatée");
+  if (isEau && !oos.eau.origine) missing.push("Origine de l'eau");
+  if (isEau && !oos.eau.point) missing.push("Point de distribution impacté");
+
+  if (missing.length) {
+    alert("Champs obligatoires manquants :\n- " + missing.join("\n- "));
+    return;
+  }
+
+  s.oos.unshift(oos);
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const ts = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  s.history.unshift({
+    ts,
+    user: oos.user,
+    action: isEau ? "Rupture eau signalée" : "Anomalie enregistrée",
+    detail: isEau
+      ? `${oos.product} — ${oos.eau.origine} / ${oos.eau.point} (${oos.severity})`
+      : `${oos.lot} — ${oos.param} = ${oos.value} (${oos.severity})`
+  });
+
+  if (s.lots && !isEau) {
+    const lotIdx = s.lots.findIndex(l => l.lot === oos.lot);
+    if (lotIdx >= 0) {
+      s.lots[lotIdx].status = oos.status === "Bloqué" ? "Bloqué (Quarantaine)" : oos.status;
+    }
+  }
+
+  localStorage.setItem(DBKEY, JSON.stringify(s));
+
+  // Résumé d'alerte adapté au type
+  let msg;
+  if (isEau) {
+    msg = `Rupture d'approvisionnement eau enregistrée :\n\n` +
+      `Produit        : ${oos.product}\n` +
+      `Origine        : ${oos.eau.origine}\n` +
+      `Point impacté  : ${oos.eau.point}\n` +
+      `Durée estimée  : ${oos.eau.duree || "—"}\n` +
+      `Cause          : ${oos.eau.cause || "—"}\n` +
+      `Impact         : ${oos.eau.impact || "—"}\n` +
+      `Criticité      : ${oos.severity}\n` +
+      `Statut         : ${oos.status}`;
+  } else {
+    msg = `Anomalie enregistrée :\n\nN° Lot : ${oos.lot}\nProduit : ${oos.product}\nParamètre : ${oos.param}\nValeur : ${oos.value}\nCriticité : ${oos.severity}\nStatut : ${oos.status}`;
+  }
+  alert(msg);
+
+  resetOOSForm();
+  renderOOS();
+}
+
+function resetOOSForm() {
+  ["oosLot","oosProduct","oosParam","oosValue","oosExpected",
+   "oosDescription","oosInvestigation","oosCorrective","oosOwner",
+   "oosDetectedBy","eauDateRupture","eauPoint","eauDuree","eauVolume",
+   "eauLotsImpactes"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  document.getElementById("oosDate").value = "";
+  document.getElementById("oosDueDate").value = "";
+  document.getElementById("oosCategory").value = "Hors spécification (OOS)";
+  document.getElementById("oosSeverity").value = "Majeure";
+  document.getElementById("oosLotStatus").value = "Bloqué";
+  document.getElementById("eauOrigine").value = "Réseau ville";
+  document.getElementById("eauCause").value = "Non identifiée";
+  document.getElementById("eauImpact").value = "Arrêt partiel";
+
+  // Masquer le bloc eau
+  document.getElementById("eauBlock").classList.remove("active");
+
+  // Rétablir les astérisques
+  ["lotRequiredMark","productRequiredMark","paramRequiredMark","valueRequiredMark"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "inline";
+  });
+
+  const badgeEl = document.getElementById("formStatusBadge");
+  badgeEl.className = "status-pill ko";
+  badgeEl.textContent = "Nouveau";
+}
+
+/* ===== AFFICHAGE REGISTRE OOS ===== */
+function renderOOS() {
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  const list = s.oos || [];
+  const query = (document.getElementById("oosSearch")?.value || "").trim().toLowerCase();
+
+  const filtered = query
+    ? list.filter(o => ((o.lot||"") + " " + (o.product||"") + " " + (o.param||"") + " " + (o.category||"")).toLowerCase().includes(query))
+    : list;
+
+  document.getElementById("oosBody").innerHTML = filtered.length
+    ? filtered.map(o => {
+        const isEau = o.category === "Eau — Rupture d'approvisionnement";
+        const catClass = isEau ? "eau" : "info";
+        const catLabel = isEau ? "Eau — Rupture" : (o.category || "OOS");
+
+        return `
+        <tr>
+          <td>${esc(o.date || "—")}</td>
+          <td><code>${esc(o.lot || (isEau ? "— (eau)" : "—"))}</code></td>
+          <td>${esc(o.product || "—")}</td>
+          <td><span class="status-pill ${catClass}">${esc(catLabel)}</span></td>
+          <td><strong>${esc(o.param || "—")}</strong></td>
+          <td><code style="color:var(--ko-fg);font-weight:700">${esc(o.value || "—")}</code></td>
+          <td>${badge(o.severity || "Majeure")}</td>
+          <td>${badge(o.status || "Bloqué")}</td>
+          <td><span style="font-size:11.5px;color:var(--text-secondary)">${esc(o.investigation || "—")}</span></td>
+          <td style="text-align:right">
+            <button class="btn btn-secondary btn-sm" onclick="viewOOS('${esc(o.id)}')">Détails</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteOOS('${esc(o.id)}')" style="margin-left:4px">✕</button>
+          </td>
+        </tr>`;
+      }).join("")
+    : `<tr><td colspan="10" class="empty-cell">Aucune anomalie enregistrée.</td></tr>`;
+
+  const badgeEl = document.getElementById("oosCountBadge");
+  if (badgeEl) {
+    badgeEl.textContent = `${filtered.length} anomalie(s)`;
+    badgeEl.className = filtered.length > 0 ? "status-pill ko" : "status-pill ok";
+  }
+
+  const navBadge = document.getElementById("navOosBadge");
+  if (navBadge) {
+    navBadge.textContent = list.length;
+    navBadge.style.display = list.length ? "inline-block" : "none";
+  }
+}
+
+/* ===== VOIR DÉTAILS OOS ===== */
+function viewOOS(id) {
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  const o = (s.oos || []).find(x => x.id === id);
+  if (!o) return;
+
+  let details = [
+    `ANOMALIE ${o.id}`,
+    ``,
+    `Date          : ${o.date}`,
+    `N° Lot        : ${o.lot || "—"}`,
+    `Produit       : ${o.product}`,
+    `Type          : ${o.category}`,
+    `Paramètre     : ${o.param}`,
+    `Valeur        : ${o.value}`,
+    `Spécification : ${o.expected || "—"}`,
+    `Criticité     : ${o.severity}`,
+    `Statut lot    : ${o.status}`,
+    `Détecté par   : ${o.detectedBy || "—"}`
+  ];
+
+  // ✅ Détails spécifiques eau
+  if (o.category === "Eau — Rupture d'approvisionnement" && o.eau) {
+    details.push(
+      ``,
+      `--- DÉTAILS RUPTURE EAU ---`,
+      `Date/heure rupture  : ${o.eau.dateRupture || "—"}`,
+      `Origine de l'eau    : ${o.eau.origine || "—"}`,
+      `Point impacté       : ${o.eau.point || "—"}`,
+      `Durée estimée       : ${o.eau.duree || "—"}`,
+      `Volume impacté      : ${o.eau.volume || "—"}`,
+      `Cause               : ${o.eau.cause || "—"}`,
+      `Impact production   : ${o.eau.impact || "—"}`,
+      `Lots impactés       : ${o.eau.lotsImpactes || "—"}`
+    );
+  }
+
+  details.push(
+    ``,
+    `--- Description ---`,
+    o.description || "—",
+    ``,
+    `--- Investigation QA ---`,
+    o.investigation || "—",
+    ``,
+    `--- Action corrective ---`,
+    o.corrective || "—",
+    ``,
+    `Responsable   : ${o.owner || "—"}`,
+    `Échéance      : ${o.dueDate || "—"}`,
+    `Créé le       : ${o.createdAt}`
+  );
+
+  alert(details.join("\n"));
+}
+
+/* ===== SUPPRESSION OOS ===== */
+function deleteOOS(id) {
+  if (!confirm("Confirmer la suppression de cette anomalie ?")) return;
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  const o = (s.oos || []).find(x => x.id === id);
+  s.oos = (s.oos || []).filter(x => x.id !== id);
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const ts = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if (!s.history) s.history = [];
+  s.history.unshift({
+    ts,
+    user: "admin",
+    action: "Anomalie supprimée",
+    detail: o ? `${o.lot || o.product} — ${o.param}` : id
+  });
+
+  localStorage.setItem(DBKEY, JSON.stringify(s));
+  renderOOS();
+}
+
+/* ===== INITIALISATION ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const dateInput = document.getElementById("oosDate");
+  if (dateInput && !dateInput.value) dateInput.value = today;
+
+  renderOOS();
+});
+</script>
+</body>
+</html>

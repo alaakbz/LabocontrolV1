@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Importer fichiers — PRODERMA LabControl</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand-950:#0f1f38;--brand-900:#142848;--brand-500:#427edb;--brand-100:#e7effa;--brand-50:#f2f7fd;
+  --sidebar-w:260px;--sidebar-bg:#182b45;--sidebar-border:rgba(255,255,255,0.1);
+  --sidebar-text:#d8e4f2;--sidebar-text-muted:#8ba2c2;--sidebar-item-active:#25406b;--sidebar-item-hover:rgba(255,255,255,0.08);
+  --bg-app:#f6f8fb;--bg-surface:#ffffff;--bg-subtle:#f1f4f9;
+  --border-light:#e5ebf3;--border-subtle:#d8e2ee;--border-medium:#b9c9dc;--border-focus:#3b74c4;
+  --text-main:#131b26;--text-secondary:#4a5b73;--text-muted:#74859d;
+  --ok-fg:#0d6842;--ok-bg:#ebf7f1;--ok-border:#a4ddc4;--ko-fg:#ad1818;--ko-bg:#fdf2f2;--ko-border:#f8b4b4;
+  --warn-fg:#9a5b00;--warn-bg:#fff8eb;--warn-border:#fed79e;--info-fg:#1d5290;--info-bg:#eef5fc;--info-border:#b9d7f5;
+  --shadow-sm:0 1px 2px 0 rgba(19,27,38,0.04);--shadow-md:0 4px 6px -1px rgba(19,27,38,0.05);
+  --radius-xs:4px;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--topbar-h:62px;--transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',sans-serif;background:var(--bg-app);color:var(--text-main);line-height:1.45;min-height:100vh;overflow-x:hidden}
+code,.font-mono{font-family:'JetBrains Mono',monospace}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+input:focus,button:focus-visible{outline:2px solid var(--border-focus);outline-offset:1px}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;z-index:40;border-right:1px solid var(--sidebar-border);user-select:none}
+.sidebar-header{padding:20px 18px 18px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar-brand{display:flex;align-items:center;gap:12px}
+.sidebar-logo-img{width:40px;height:40px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0}
+.sidebar-logo{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:var(--radius-sm);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px}
+.sidebar-title{font-size:15px;font-weight:700;color:#fff}
+.sidebar-sub{font-size:11px;color:var(--sidebar-text-muted);display:block;margin-top:1px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:16px 10px;display:flex;flex-direction:column;gap:16px}
+.nav-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--sidebar-text-muted);padding:0 10px 4px}
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:8.5px 11px;border-radius:var(--radius-sm);color:var(--sidebar-text);font-size:12.5px;font-weight:500;text-align:left;transition:var(--transition);text-decoration:none}
+.nav-item:hover{background:var(--sidebar-item-hover);color:#fff}
+.nav-item.active{background:var(--sidebar-item-active);color:#fff;font-weight:600;border-left:3px solid #3b82f6}
+.nav-icon{width:17px;height:17px;flex-shrink:0;opacity:0.85}
+.nav-item.active .nav-icon{opacity:1;color:#93c5fd}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700}
+.badge-danger{background:rgba(220,38,38,0.25);color:#fca5a5;border:1px solid rgba(220,38,38,0.35)}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--sidebar-border);display:flex;align-items:center;justify-content:space-between}
+.user-info-box{display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:#2b4875;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.2)}
+.user-name{font-size:12px;font-weight:600;color:#fff}
+.user-role{font-size:10.5px;color:var(--sidebar-text-muted)}
+.main-wrapper{margin-left:var(--sidebar-w);width:calc(100% - var(--sidebar-w));min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:var(--topbar-h);background:var(--bg-surface);border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:30}
+.page-title-group h1{font-size:17px;font-weight:700}
+.page-title-group .breadcrumbs{font-size:11.5px;color:var(--text-muted)}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+.lab-clock{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);padding:5px 10px;border-radius:var(--radius-sm);background:var(--bg-subtle);border:1px solid var(--border-light);display:flex;align-items:center;gap:6px}
+.mode-badge{padding:4px 9px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;background:var(--brand-50);border:1px solid var(--brand-100);color:#1e3a68}
+.content-body{padding:24px 28px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.col-12{grid-column:span 12}
+.lab-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);overflow:hidden}
+.lab-card-header{padding:14px 18px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between}
+.lab-card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.lab-card-subtitle{font-size:11.5px;color:var(--text-muted);margin-top:1px}
+.lab-card-body{padding:18px}
+.table-container{width:100%;overflow-x:auto;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-surface)}
+.lab-table{width:100%;border-collapse:collapse;text-align:left;font-size:12.5px}
+.lab-table th{background:var(--bg-subtle);color:var(--text-secondary);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;padding:10px 14px;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+.lab-table td{padding:10px 14px;border-bottom:1px solid var(--border-light)}
+.lab-table tbody tr:hover{background-color:var(--bg-subtle)}
+.lab-table .empty-cell{text-align:center;padding:32px 16px;color:var(--text-muted)}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.status-pill::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%}
+.status-pill.ok{background:var(--ok-bg);color:var(--ok-fg);border:1px solid var(--ok-border)}
+.status-pill.ok::before{background:var(--ok-fg)}
+.status-pill.ko{background:var(--ko-bg);color:var(--ko-fg);border:1px solid var(--ko-border)}
+.status-pill.ko::before{background:var(--ko-fg)}
+.status-pill.wait{background:var(--warn-bg);color:var(--warn-fg);border:1px solid var(--warn-border)}
+.status-pill.wait::before{background:var(--warn-fg)}
+.status-pill.info{background:var(--info-bg);color:var(--info-fg);border:1px solid var(--info-border)}
+.status-pill.info::before{background:var(--info-fg)}
+.form-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+.form-input,.form-select{width:100%;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border-medium);border-radius:var(--radius-sm);font-size:12.5px;color:var(--text-main);transition:var(--transition)}
+.form-input:focus,.form-select:focus{border-color:var(--brand-500)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;transition:var(--transition)}
+.btn-primary{background:#1e3a68;color:#fff;border:1px solid #152c50}
+.btn-primary:hover{background:#274c87}
+.btn-secondary{background:var(--bg-subtle);color:var(--text-secondary);border:1px solid var(--border-medium)}
+.btn-secondary:hover{background:var(--border-light)}
+.btn-success{background:#0f766e;color:#fff;border:1px solid #115e59}
+.btn-success:hover{background:#115e59}
+.btn-danger{background:#b91c1c;color:#fff;border:1px solid #991b1b}
+.btn-danger:hover{background:#991b1b}
+.btn-sm{padding:4px 8px;font-size:11.5px}
+.btn-icon{padding:6px;border-radius:var(--radius-sm);color:var(--text-secondary)}
+.btn-icon:hover{background:var(--bg-subtle)}
+.norm-guide-box{background:var(--info-bg);border:1px solid var(--info-border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-main);display:flex;gap:10px;align-items:flex-start}
+.norm-guide-box strong{color:var(--info-fg)}
+.import-dropzone{border:2px dashed var(--border-medium);border-radius:var(--radius-md);padding:32px;text-align:center;background:var(--bg-subtle);transition:var(--transition);cursor:pointer}
+.import-dropzone:hover,.import-dropzone.dragover{border-color:var(--brand-500);background:var(--brand-50)}
+.import-dropzone svg{margin-bottom:12px;color:#2563eb}
+.import-dropzone h3{font-size:15px;font-weight:700;color:var(--text-main);margin-bottom:6px}
+.import-dropzone p{font-size:12.5px;color:var(--text-muted)}
+.file-type-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:10px;font-weight:800;color:#fff;margin-right:8px}
+.file-type-pdf{background:#dc2626}
+.file-type-doc{background:#2563eb}
+.file-type-xls{background:#16a34a}
+.file-type-csv{background:#0891b2}
+.file-type-json{background:#9333ea}
+.file-type-other{background:#64748b}
+.file-list-name{display:flex;align-items:center;gap:8px}
+.file-list-name strong{font-size:12.5px}
+.file-list-size{font-size:11px;color:var(--text-muted)}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.25s ease}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .main-wrapper{margin-left:0!important;width:100%!important}
+  .topbar{padding:0 16px}.content-body{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></symbol>
+  <symbol id="icon-sample" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></symbol>
+  <symbol id="icon-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31L4.36 19.34A2 2 0 0 0 6.1 22h11.8a2 2 0 0 0 1.74-2.66L14 9.31V2"></path><line x1="8" y1="2" x2="16" y2="2"></line><line x1="8" y1="14" x2="16" y2="14"></line></symbol>
+  <symbol id="icon-microbe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></symbol>
+  <symbol id="icon-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></symbol>
+  <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+  <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></symbol>
+  <symbol id="icon-audit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle></symbol>
+  <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></symbol>
+  <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></symbol>
+</svg>
+
+<aside class="sidebar" id="appSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <img src="img/logo.png" alt="PRODERMA" class="sidebar-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <div class="sidebar-logo" style="display:none">P</div>
+      <div><div class="sidebar-title">PRODERMA</div><div class="sidebar-sub">LabControl V1.1</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Opérations Analytiques</div>
+    <div class="nav-group">
+      <a class="nav-item" href="dashboard.html"><svg class="nav-icon"><use href="#icon-dash"></use></svg><span>Tableau de bord</span></a>
+     
+
+      
+      <a class="nav-item" href="micro.html"><svg class="nav-icon"><use href="#icon-microbe"></use></svg><span>Microbiologie</span></a>
+    </div>
+    <div class="nav-section-label">Référentiel & Qualité</div>
+    <div class="nav-group">
+      
+      <a class="nav-item" href="standards.html"><svg class="nav-icon"><use href="#icon-book"></use></svg><span>Bibliothèque IANOR</span></a>
+      <a class="nav-item" href="trends.html"><svg class="nav-icon"><use href="#icon-chart"></use></svg><span>PH des produits</span></a>
+      <a class="nav-item" href="oos.html"><svg class="nav-icon"><use href="#icon-alert"></use></svg><span>Anomalies / OOS</span><span class="nav-badge badge-danger" id="navOosBadge" style="display:none">0</span></a>
+    </div>
+    <div class="nav-section-label">Conformité & Système</div>
+    <div class="nav-group">
+      <a class="nav-item active" href="import.html"><svg class="nav-icon"><use href="#icon-upload"></use></svg><span>Importer fichiers</span></a>
+      <a class="nav-item" href="users.html"><svg class="nav-icon"><use href="#icon-users"></use></svg><span>Habilitations & Signatures</span></a>
+      <a class="nav-item" href="settings.html"><svg class="nav-icon"><use href="#icon-settings"></use></svg><span>Paramétrage V1.1</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info-box">
+      <div class="user-avatar" id="userInitial">?</div>
+      <div><div class="user-name" id="userNameLabel">—</div><div class="user-role" id="userRoleLabel">—</div></div>
+    </div>
+    <button class="btn-icon" onclick="logout()" title="Déconnexion" style="color:#a8bedb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="page-title-group">
+      <h1>Importer fichiers</h1>
+      <div class="breadcrumbs">Chargement Word, Excel, PDF, CSV, JSON</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="lab-clock"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span id="liveTime">--:--:--</span></div>
+      <div class="mode-badge">RÉFÉRENTIEL IANOR V1.1</div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleLang()">FR / AR</button>
+    </div>
+  </header>
+
+  <div class="content-body">
+    <div class="grid">
+      <div class="col-12 lab-card">
+        <div class="lab-card-header">
+          <div>
+            <div class="lab-card-title"><svg width="16" height="16"><use href="#icon-upload"></use></svg><span>Importer des fichiers (Word, Excel, PDF…)</span></div>
+            <div class="lab-card-subtitle">Chargez un fichier et stockez-le dans la bibliothèque locale</div>
+          </div>
+        </div>
+        <div class="lab-card-body">
+          <div class="form-grid" style="margin-bottom:16px">
+            <div class="form-field" style="grid-column:span 3">
+              <label class="form-label">Type de document</label>
+              <select class="form-select" id="fileDocType">
+                <option>Bulletin d'analyse</option>
+                <option>Certificat d'analyse (COA)</option>
+                <option>Procédure interne</option>
+                <option>Norme / Référentiel</option>
+                <option>Fiche technique</option>
+                <option>Rapport d'essai</option>
+                <option>Autre document</option>
+              </select>
+            </div>
+
+            <!-- ✅ حقل فارغ، المستخدم يكتب اسمه يدوياً -->
+            <div class="form-field" style="grid-column:span 3">
+              <label class="form-label">Importé par *</label>
+              <input class="form-input" id="fileUploader" placeholder="Saisissez votre nom" autocomplete="off">
+            </div>
+
+            <div class="form-field" style="grid-column:span 3">
+              <label class="form-label">Description</label>
+              <input class="form-input" id="fileDescription" placeholder="Description du document">
+            </div>
+
+            <div class="form-field" style="grid-column:span 3">
+              <label class="form-label">Rechercher dans la bibliothèque</label>
+              <input class="form-input" id="fileSearch" placeholder="Nom, type, description..." oninput="renderLibrary()">
+            </div>
+          </div>
+
+          <div class="import-dropzone" id="importDropzone" onclick="document.getElementById('fileInput').click()">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <h3>Cliquez ou déposez votre fichier ici</h3>
+            <p>Formats acceptés : .doc, .docx, .xlsx, .xls, .pdf, .csv, .json, .txt — Taille max : 20 Mo</p>
+            <input type="file" id="fileInput" accept=".doc,.docx,.xls,.xlsx,.pdf,.csv,.json,.txt" style="display:none" onchange="handleFileUpload(event)">
+          </div>
+
+          <div class="norm-guide-box" style="margin-top:16px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <div>
+              <strong>Stockage local :</strong> Les fichiers sont conservés dans votre navigateur (IndexedDB). Vous pouvez les consulter, télécharger ou supprimer à tout moment. Les fichiers volumineux sont pris en charge jusqu'à ~20 Mo.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Bibliothèque des fichiers importés (seul tableau conservé) -->
+      <div class="col-12 lab-card">
+        <div class="lab-card-header">
+          <div>
+            <div class="lab-card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              Bibliothèque des fichiers importés
+            </div>
+            <div class="lab-card-subtitle">Consultez, téléchargez ou supprimez les fichiers déjà importés</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="fileCountBadge" class="status-pill info">0 fichier(s)</span>
+            <button class="btn btn-secondary btn-sm" onclick="refreshLibrary()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+              Actualiser
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="lab-table">
+            <thead>
+              <tr>
+                <th style="width:35%">Nom du fichier</th>
+                <th>Type de doc.</th>
+                <th>Taille</th>
+                <th>Date d'import</th>
+                <th>Importé par</th>
+                <th>Description</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="libraryBody">
+              <tr><td colspan="7" class="empty-cell">Aucun fichier importé.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const DBKEY = "proderma_labcontrol_v1";
+const IDB_NAME = "proderma_files_db";
+const IDB_STORE = "files";
+const IDB_VERSION = 1;
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+function formatSize(bytes){
+  if (bytes < 1024) return bytes + " o";
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + " Ko";
+  return (bytes/(1024*1024)).toFixed(2) + " Mo";
+}
+
+function getFileTypeClass(name){
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  if (ext === 'pdf') return 'file-type-pdf';
+  if (ext === 'doc' || ext === 'docx') return 'file-type-doc';
+  if (ext === 'xls' || ext === 'xlsx') return 'file-type-xls';
+  if (ext === 'csv') return 'file-type-csv';
+  if (ext === 'json') return 'file-type-json';
+  return 'file-type-other';
+}
+
+function getFileExt(name){
+  return (name.split('.').pop() || '').toUpperCase().substring(0,4);
+}
+
+function loadUser(){
+  const u = sessionStorage.getItem("proderma_user");
+  if(!u){
+    document.getElementById("userNameLabel").textContent = "—";
+    document.getElementById("userRoleLabel").textContent = "Non connecté";
+    document.getElementById("userInitial").textContent = "?";
+    return null;
+  }
+  const user = JSON.parse(u);
+  const displayName = user.name || user.login || "—";
+  document.getElementById("userNameLabel").textContent = displayName;
+  document.getElementById("userRoleLabel").textContent = user.role || "QC";
+  document.getElementById("userInitial").textContent = displayName.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  return user;
+}
+loadUser();
+
+function logout(){if(confirm("Confirmez la déconnexion ?")){sessionStorage.removeItem("proderma_user");window.location.href="index.html";}}
+function toggleLang(){document.documentElement.dir = document.documentElement.dir==="rtl"?"ltr":"rtl"}
+
+setInterval(()=>{const d=new Date();const el=document.getElementById("liveTime");if(el)el.textContent=d.toLocaleTimeString('fr-FR',{hour12:false});},1000);
+
+function persist(action,detail){
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  if(!s.history) s.history = [];
+  if(action){
+    const now = new Date(), pad = n=>String(n).padStart(2,'0');
+    const ts = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const user = sessionStorage.getItem("proderma_user") ? JSON.parse(sessionStorage.getItem("proderma_user")) : {login:"admin"};
+    s.history.unshift({ts, user: user.login || "admin", action, detail});
+  }
+  localStorage.setItem(DBKEY, JSON.stringify(s));
+}
+
+/* ✅ Mise à jour du badge OOS (sidebar) — conservé après suppression de l'historique */
+function updateOosBadge(){
+  const s = JSON.parse(localStorage.getItem(DBKEY) || "{}");
+  const oosLen = (s.oos || []).length;
+  const nb = document.getElementById("navOosBadge");
+  if(nb){ nb.textContent = oosLen; nb.style.display = oosLen ? "inline-block" : "none"; }
+}
+
+function openIDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(IDB_STORE)){
+        db.createObjectStore(IDB_STORE, {keyPath:"id"});
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function idbPut(fileRecord){
+  const db = await openIDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(IDB_STORE,"readwrite");
+    tx.objectStore(IDB_STORE).put(fileRecord);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+
+async function idbGet(id){
+  const db = await openIDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(IDB_STORE,"readonly");
+    const req = tx.objectStore(IDB_STORE).get(id);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function idbDelete(id){
+  const db = await openIDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(IDB_STORE,"readwrite");
+    tx.objectStore(IDB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+
+async function idbGetAll(){
+  const db = await openIDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(IDB_STORE,"readonly");
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+/* ✅ handleFileUpload : يستخدم فقط ما كتبه المستخدم، ويرفض إذا كان الحقل فارغاً */
+async function handleFileUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 20*1024*1024){
+    alert("Fichier trop volumineux (max 20 Mo).");
+    event.target.value = "";
+    return;
+  }
+
+  const docType     = document.getElementById("fileDocType").value;
+  const description = document.getElementById("fileDescription").value.trim();
+  const uploaderInput = (document.getElementById("fileUploader")?.value || "").trim();
+
+  // ❌ لا Administrateur، لا اسم المستخدم : إذا فارغ → رفض
+  if(!uploaderInput){
+    alert("⚠ Veuillez saisir votre nom dans le champ « Importé par » avant d'importer le fichier.");
+    document.getElementById("fileUploader").focus();
+    event.target.value = "";
+    return;
+  }
+
+  const uploadedBy = uploaderInput;
+
+  const arrayBuffer = await file.arrayBuffer();
+
+  const record = {
+    id: "FILE-" + Date.now().toString().slice(-8) + "-" + Math.random().toString(36).slice(-4),
+    name: file.name,
+    size: file.size,
+    mimeType: file.type || "application/octet-stream",
+    docType: docType,
+    description: description,
+    uploadedAt: new Date().toLocaleString('fr-FR'),
+    uploadedBy: uploadedBy,
+    data: arrayBuffer
+  };
+
+  try{
+    await idbPut(record);
+
+    persist("Fichier importé", `${file.name} (${formatSize(file.size)}) — ${docType} — par ${uploadedBy}`);
+
+    alert(`✅ Fichier importé avec succès :\n\n${file.name}\nTaille : ${formatSize(file.size)}\nType : ${docType}\nImporté par : ${uploadedBy}`);
+
+    // ✅ بعد الاستيراد : نفرّغ الحقل تماماً
+    event.target.value = "";
+    document.getElementById("fileDescription").value = "";
+    document.getElementById("fileUploader").value = "";
+
+    renderLibrary();
+    updateFileCount();
+  } catch(err){
+    console.error("Erreur import :", err);
+    alert("Erreur lors de l'import du fichier : " + err.message);
+  }
+}
+
+async function renderLibrary(){
+  const tbody = document.getElementById("libraryBody");
+  if(!tbody) return;
+
+  let files = [];
+  try{ files = await idbGetAll(); } catch(err){ console.error(err); }
+
+  const q = (document.getElementById("fileSearch")?.value || "").trim().toLowerCase();
+  const filtered = q
+    ? files.filter(f => ((f.name||"") + " " + (f.docType||"") + " " + (f.description||"") + " " + (f.uploadedBy||"")).toLowerCase().includes(q))
+    : files;
+
+  filtered.sort((a,b) => (b.id > a.id ? 1 : -1));
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-cell">Aucun fichier importé.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(f => `
+    <tr>
+      <td>
+        <div class="file-list-name">
+          <span class="file-type-icon ${getFileTypeClass(f.name)}">${esc(getFileExt(f.name))}</span>
+          <strong>${esc(f.name)}</strong>
+        </div>
+      </td>
+      <td><span class="status-pill info">${esc(f.docType || "—")}</span></td>
+      <td><span class="file-list-size">${formatSize(f.size || 0)}</span></td>
+      <td><code style="font-size:11px">${esc(f.uploadedAt || "—")}</code></td>
+      <td><strong style="font-size:12px">${esc(f.uploadedBy || "—")}</strong></td>
+      <td><span style="font-size:11.5px;color:var(--text-secondary)">${esc(f.description || "—")}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-secondary btn-sm" onclick="viewFile('${f.id}')" title="Voir">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="downloadFile('${f.id}')" title="Télécharger" style="margin-left:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteFile('${f.id}')" title="Supprimer" style="margin-left:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg>
+        </button>
+      </td>
+    </tr>
+  `).join("");
+
+  updateFileCount();
+}
+
+async function updateFileCount(){
+  try{
+    const files = await idbGetAll();
+    const badge = document.getElementById("fileCountBadge");
+    if(badge){
+      badge.textContent = `${files.length} fichier(s)`;
+      badge.className = files.length > 0 ? "status-pill info" : "status-pill ok";
+    }
+  } catch(err){ console.error(err); }
+}
+
+async function viewFile(id){
+  try{
+    const f = await idbGet(id);
+    if(!f){ alert("Fichier introuvable."); return; }
+    const blob = new Blob([f.data], {type: f.mimeType || "application/octet-stream"});
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, "_blank");
+    if(!w) alert("Veuillez autoriser les pop-ups pour visualiser le fichier.");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch(err){
+    console.error("Erreur visualisation :", err);
+    alert("Impossible d'ouvrir le fichier : " + err.message);
+  }
+}
+
+async function downloadFile(id){
+  try{
+    const f = await idbGet(id);
+    if(!f){ alert("Fichier introuvable."); return; }
+    const blob = new Blob([f.data], {type: f.mimeType || "application/octet-stream"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = f.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    persist("Fichier téléchargé", f.name);
+  } catch(err){
+    console.error("Erreur téléchargement :", err);
+    alert("Erreur lors du téléchargement : " + err.message);
+  }
+}
+
+async function deleteFile(id){
+  if(!confirm("Confirmer la suppression de ce fichier ?")) return;
+  try{
+    const f = await idbGet(id);
+    await idbDelete(id);
+    persist("Fichier supprimé", f ? f.name : id);
+    renderLibrary();
+  } catch(err){
+    console.error("Erreur suppression :", err);
+    alert("Erreur lors de la suppression : " + err.message);
+  }
+}
+
+function refreshLibrary(){
+  renderLibrary();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dz = document.getElementById("importDropzone");
+  if(dz){
+    ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault(); dz.classList.add("dragover");
+    }));
+    ["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault(); dz.classList.remove("dragover");
+    }));
+    dz.addEventListener("drop", e => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if(file){
+        const input = document.getElementById("fileInput");
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        handleFileUpload({target: input});
+      }
+    });
+  }
+
+  // ✅ حذف كامل للـ pré-remplissage : الحقل يبقى فارغاً
+  renderLibrary();
+  updateOosBadge();   // ✅ conserver le badge OOS dans la sidebar
+});
+</script>
+</body>
+</html>
